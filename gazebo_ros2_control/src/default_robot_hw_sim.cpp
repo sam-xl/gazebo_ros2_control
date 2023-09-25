@@ -275,11 +275,11 @@ bool DefaultRobotHWSim::initSim(
       &joint_effort_limits_[j], &joint_vel_limits_[j]);
     if (joint_control_methods_[j] != EFFORT) {
       try {
-        nh_->declare_parameter(transmissions[j].joints[0].name + ".p");
-        nh_->declare_parameter(transmissions[j].joints[0].name + ".i");
-        nh_->declare_parameter(transmissions[j].joints[0].name + ".d");
-        nh_->declare_parameter(transmissions[j].joints[0].name + ".i_clamp_max");
-        nh_->declare_parameter(transmissions[j].joints[0].name + ".i_clamp_min");
+        nh_->declare_parameter(transmissions[j].joints[0].name + ".p", rclcpp::PARAMETER_NOT_SET);
+        nh_->declare_parameter(transmissions[j].joints[0].name + ".i", rclcpp::PARAMETER_NOT_SET);
+        nh_->declare_parameter(transmissions[j].joints[0].name + ".d", rclcpp::PARAMETER_NOT_SET);
+        nh_->declare_parameter(transmissions[j].joints[0].name + ".i_clamp_max", rclcpp::PARAMETER_NOT_SET);
+        nh_->declare_parameter(transmissions[j].joints[0].name + ".i_clamp_min", rclcpp::PARAMETER_NOT_SET);
         nh_->declare_parameter(transmissions[j].joints[0].name + ".antiwindup", false);
 
         if (nh_->get_parameter(transmissions[j].joints[0].name + ".p").get_type() ==

@@ -101,7 +101,7 @@ public:
   std::vector<std::shared_ptr<controller_interface::ControllerInterface>> controllers_;
 
   // Timing
-  rclcpp::Duration control_period_ = rclcpp::Duration(0);
+  rclcpp::Duration control_period_ = rclcpp::Duration(0, 0);
   rclcpp::Time last_update_sim_time_ros_;
   rclcpp::Time last_write_sim_time_ros_;
 
@@ -194,11 +194,16 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
   }
 
   // Get the Gazebo simulation period
-  rclcpp::Duration gazebo_period(impl_->parent_model_->GetWorld()->Physics()->GetMaxStepSize());
+  rclcpp::Duration gazebo_period(
+    std::chrono::duration_cast<std::chrono::nanoseconds>(
+      std::chrono::duration<double>(
+        impl_->parent_model_->GetWorld()->Physics()->GetMaxStepSize())));
 
   // Decide the plugin control period
   if (impl_->sdf_->HasElement("control_period")) {
-    impl_->control_period_ = rclcpp::Duration(impl_->sdf_->Get<double>("control_period"));
+    impl_->control_period_ = rclcpp::Duration(
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::duration<double>(impl_->sdf_->Get<double>("control_period"))));
 
     // Check the period against the simulation period
     if (impl_->control_period_ < gazebo_period) {
@@ -298,7 +303,7 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
               // TODO(ddengster): Do stricter typing for set_parameter value types.
               // (ie. Numbers should be converted to int/double/etc instead of strings)
               if (!node->has_parameter(key)) {
-                node->declare_parameter(key);
+                node->declare_parameter(key, rclcpp::PARAMETER_NOT_SET);
               }
 
               auto is_number = [](const std::string & str) -> bool {
@@ -336,12 +341,12 @@ void GazeboRosControlPlugin::Load(gazebo::physics::ModelPtr parent, sdf::Element
                     val.push_back(name);
                   }
                   if (!node->has_parameter(key)) {
-                    node->declare_parameter(key);
+                    node->declare_parameter(key, rclcpp::PARAMETER_NOT_SET);
                   }
                   node->set_parameter({rclcpp::Parameter(key, val)});
                   if (key == "joints") {
                     if (!node->has_parameter("write_op_modes")) {
-                      node->declare_parameter("write_op_modes");
+                      node->declare_parameter("write_op_modes", rclcpp::PARAMETER_NOT_SET);
                     }
                     node->set_parameter(rclcpp::Parameter("write_op_modes", val));
                   }
